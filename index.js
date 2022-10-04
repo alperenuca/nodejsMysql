@@ -1,29 +1,34 @@
-var http = require("http"); 
-var fs = require("fs");
+const express = require("express");
+const app = express();
 
-var server = http.createServer((req, res) => {
+app.set("view engine","ejs");
 
-    if(req.url == "/") {
-        fs.readFile("index.html", (err, html) => {
-            res.write(html);
-            res.end();
-        });
-    } else if(req.url == "/products") {
-        fs.readFile("urunler.html", (err, html) => {
-            res.write(html);
-            res.end();
-        });
-    } else {
-        fs.readFile("404.html", (err, html) => {
-            res.write(html);
-            res.end();
-        });
-    }    
+app.use(express.static('public'));
+app.use(express.static('node_modules'));
+
+const data = [
+    {id: 1, name: "iphone 14", price: 30000, isActive: true, imageUrl: "1.jpeg" },
+    {id: 2, name: "iphone 15", price: 40000, isActive: false, imageUrl: "2.jpeg" },
+    {id: 3, name: "iphone 16", price: 50000, isActive: true, imageUrl: "3.jpeg" }
+];
+
+// routes
+
+app.use("/products/:id", function(req, res) {
+    const urun = data.find(u => u.id == req.params.id);
+    res.render("product-details", urun);
 });
 
-server.listen(3000, () => {
-    console.log("node.js server at port 3000");
+app.use("/products", function(req, res) {
+    res.render("products", {
+        urunler: data
+    });
 });
 
+app.use("/", function(req, res) {
+    res.render("index");
+});
 
-
+app.listen(3000, () => {
+    console.log("listening on port 3000");
+});
